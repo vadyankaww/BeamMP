@@ -147,7 +147,7 @@ local function playerLeft(params)
 	end 
 end
 
-function uiDialog(params) 
+local function uiDialog(params) 
 	local dialogInfo = jsonDecode(params)
 
 	if dialogInfo ~= nil then
