@@ -147,6 +147,34 @@ local function playerLeft(params)
 	end 
 end
 
+function uiDialog(params) 
+	local dialogInfo = jsonDecode(params)
+
+	if dialogInfo ~= nil then
+		local buttons = next(dialogInfo.buttons or {}) and dialogInfo.buttons or {
+			{
+				label = "OK",
+				key = nil,
+				default = true,
+				isCancel = true
+			}
+		}
+
+		be:queueJS([[
+			angular.element(document.body).injector().get('ConfirmationDialog').open(
+				JSON.parse(`]] .. jsonEncode(dialogInfo.title or "Dialog") .. [[`), JSON.parse(`]] .. jsonEncode(dialogInfo.body) .. [[`),
+					]] .. jsonEncode(buttons) .. [[,
+				{ class: "]] .. (dialogInfo.class or "") .. [[" }
+			).then(res => {
+				if (res) {
+					bngApi.engineLua(`TriggerServerEvent("` + res + `", "]] .. (dialogInfo.interactionID or "") .. [[")`)
+					bngApi.engineLua(`extensions.hook("` + res + `", "]] .. (dialogInfo.interactionID or "") .. [[")`)
+				}
+			});
+		]])
+	end
+end
+
 -- -----------------------------------------------------------------------------
 -- Events System
 -- -----------------------------------------------------------------------------
@@ -282,6 +310,7 @@ local HandleNetwork = {
 	['C'] = function(params) UI.chatMessage(params) end, -- Chat Message Event
 	['R'] = function(params) MPControllerGE.handle(params) end, -- Controller data
 	['n'] = function(params) local category, icon, message = params:match("([^:]+):?(.-):(.+)") UI.showNotification(message, category, icon) end, -- Custom UI notification
+	['D'] = function(params) uiDialog(params) end, -- Custom UI Dialog
 }
 
 
