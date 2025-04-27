@@ -160,15 +160,20 @@ local function uiDialog(params)
 			}
 		}
 
+		if dialogInfo.class ~= nil and dialogInfo.class ~= "" and dialogInfo.class ~= "experimental" then
+			dialogInfo.class = ""
+		end
+
 		be:queueJS([[
 			angular.element(document.body).injector().get('ConfirmationDialog').open(
-				JSON.parse(`]] .. jsonEncode(dialogInfo.title or "Dialog") .. [[`), JSON.parse(`]] .. jsonEncode(dialogInfo.body) .. [[`),
-					]] .. jsonEncode(buttons) .. [[,
-				{ class: "]] .. (dialogInfo.class or "") .. [[" }
+				DOMPurify.sanitize(JSON.parse(atob(`]] .. require("mime").b64(jsonEncode(dialogInfo.title or "Dialog")) .. [[`))), 
+				DOMPurify.sanitize(JSON.parse(atob(`]] .. require("mime").b64(jsonEncode(dialogInfo.body)) .. [[`))),
+					JSON.parse(atob(`]] .. require("mime").b64(jsonEncode(buttons)) .. [[`)),
+				{ class: atob(`]] .. require("mime").b64(dialogInfo.class or "") .. [[`) }
 			).then(res => {
 				if (res) {
-					bngApi.engineLua(`TriggerServerEvent("` + res + `", "]] .. (dialogInfo.interactionID or "") .. [[")`)
-					bngApi.engineLua(`extensions.hook("` + res + `", "]] .. (dialogInfo.interactionID or "") .. [[")`)
+					bngApi.engineLua(`TriggerServerEvent("` + res + `", require("mime").unb64("]] .. require("mime").b64(dialogInfo.interactionID or "") .. [["))`)
+					bngApi.engineLua(`extensions.hook("` + res + `", require("mime").unb64("]] .. require("mime").b64(dialogInfo.interactionID or "") .. [["))`)
 				}
 			});
 		]])
