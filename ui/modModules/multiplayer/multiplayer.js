@@ -29,6 +29,9 @@ let repopulateServerList = async function() {
 
 };
 
+
+import('/ui/lib/ext/purify.min.js')
+
 export default angular.module('multiplayer', ['ui.router'])
 
 .config(['$stateProvider', function($stateProvider) {
